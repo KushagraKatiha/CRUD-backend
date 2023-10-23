@@ -5,6 +5,8 @@ const router = require('./routes/userRoutes.js')
 
 const app = express()
 dbConnection()
+app.use(express.json())
+express.urlencoded({extended: true})
 app.use('/', router)
 
 
