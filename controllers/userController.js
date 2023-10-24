@@ -51,7 +51,52 @@ const addUser = async (req, res) => {
     }
 }
 
+const getUser = async (req, res) => {
+    const {email, username, password} = req.body;
+    let user = null
+
+    try {
+        // If any field is missing
+        if((!username && !email) || !password){
+            throw new Error('Please fill all the fields')
+        }
+
+        if(!username && email){
+            // If user exists with this email
+            user = await User.findOne({email}).select('+password') || null
+        }else if(!email && username){
+            user = await User.findOne({username}).select('+password') || null
+        }else{
+            throw new Error('Please enter either username or email')
+        }
+
+        // If user does not exist
+        if(user===null){
+            throw new Error('User does not exist')
+        }
+
+        // If password is wrong
+        if( password !== user.password){
+            throw new Error('Wrong password')
+        }
+
+        user.password = undefined
+
+        res.status(200).json({
+            success: true,
+            user
+        })
+        
+    } catch (err) {
+        res.status(400).json({
+            success: false,
+            message: err.message
+        })
+    }
+}
+
 module.exports = {
     home,
-    addUser
+    addUser,
+    getUser
 }
