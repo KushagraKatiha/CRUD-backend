@@ -1,4 +1,6 @@
 const User = require('../models/userModel.js');
+const bcrypt = require('bcryptjs')
+const emailValidator = require('email-validator')
 
 const home = (req, res) => {
     res.send('Hello World!')
@@ -13,9 +15,19 @@ const addUser = async (req, res) => {
             throw new Error('Please fill all the fields')
         }
 
+        // If password is less than 6 characters
+        if(password.length < 6){
+            throw new Error('Password must be atleast 6 characters long')
+        }
+
         // If password and confirmPassword do not match
         if(password !== confirmPassword){
             throw new Error('Passwords do not match')
+        }
+
+        // If email is not valid 
+        if(!emailValidator.validate(email)){
+            throw new Error('Please enter a valid email')
         }
 
         // If user already exists with same Email
@@ -30,12 +42,15 @@ const addUser = async (req, res) => {
             throw new Error('User already exists with this username')
         }
 
+        // Hashing the password
+        const hashedPass = await bcrypt.hash(password, 8);
+
         // If everything is fine
         const user = await User.create({
             name,
             username,
             email,
-            password
+            password: hashedPass
         })
 
         res.status(201).json({
@@ -76,7 +91,7 @@ const getUser = async (req, res) => {
         }
 
         // If password is wrong
-        if( password !== user.password){
+        if( !bcrypt.compare(password, user.password)){
             throw new Error('Wrong password')
         }
 
