@@ -97,6 +97,16 @@ const getUser = async (req, res) => {
 
         user.password = undefined
 
+        // Injecting JWT token
+        const token = user.jwtToken()
+
+        const cookieOptions = {
+            maxAge: 24 * 60 * 60 * 1000,  // 24 hours
+            httpOnly: true
+        }
+
+        res.cookie('token', token, cookieOptions)
+
         res.status(200).json({
             success: true,
             user
@@ -111,105 +121,51 @@ const getUser = async (req, res) => {
 }
 
 const delUser = async (req, res) => {
-    const {email, username, password} = req.body;
-    let user = null
+    const userId = req.user.id 
 
     try {
-        // If any field is missing
-        if((!username && !email) || !password){
-            throw new Error('Please fill all the fields')
-        }
-
-        if(!username && email){
-            // If user exists with this email
-            user = await User.findOne({email}).select('+password') || null
-        }else if(!email && username){
-            user = await User.findOne({username}).select('+password') || null
-        }else{
-            throw new Error('Please enter either username or email')
-        }
-
-        // If user does not exist
-        if(user===null){
-            throw new Error('User does not exist')
-        }
-
-        // If password is wrong
-        if( password !== user.password){
-            throw new Error('Wrong password')
-        }
-        user.password = undefined
-
-        // If everything is fine
-
-
-        if(await User.findOneAndDelete({email}) || await User.findOneAndDelete({username})){
-            console.log('User deleted successfully');
-        }else{
-            throw new Error('User does not exist')
-        }
-
-
+        const deletedUser = await User.findByIdAndDelete({_id:userId})
+        console.log(deletedUser);
         res.status(200).json({
             success: true,
-            deleteCount: 1
+            deletedUser
         })
-        
     } catch (err) {
         res.status(400).json({
             success: false,
             message: err.message
         })
     }
-
 }
 
 const updateUser = async (req, res) => {
-    const {email, username, password} = req.body;
-    let user = null
-
-    try {
-        // If any field is missing
-        if((!username && !email) || !password){
-            throw new Error('Please fill all the fields')
-        }
-
-        if(!username && email){
-            // If user exists with this email
-            user = await User.findOne({email}).select('+password') || null
-        }else if(!email && username){
-            user = await User.findOne({username}).select('+password') || null
-        }else{
-            throw new Error('Please enter either username or email')
-        }
-
-        // If user does not exist
-        if(user===null){
-            throw new Error('User does not exist')
-        }
-
-        // If password is wrong
-        if( password !== user.password){
-            throw new Error('Wrong password')
-        }
-        user.password = undefined
-
-        
-        // If everything is fine
-        const userId = user["_id"]
-        const newUser = await User.findByIdAndUpdate(userId, {name: "updatedName", email: "updateduser@gmail.com"}, {new: true, runValidators: true})
-
+    const userId = req.user.id
+    const {name, username, email, password} = req.body
+    try{
+        const updatedUser = await User.findByIdAndUpdate(userId, req.body, {new: true, runValidators: true})
         res.status(200).json({
             success: true,
-            newUser
+            updatedUser
         })
-
-
     }catch(err){
         res.status(400).json({
             success: false,
             message: err.message
-        
+        })
+    }
+}
+
+const getAllUsers = async (req, res) => {
+    try{
+        const users = await User.find()
+        res.status(200).json({
+            success: true,
+            users
+        })
+    }catch(err){
+        res.status(400).json({
+            success: false,
+            message: err.message
         })
     }
 }
@@ -219,5 +175,6 @@ module.exports = {
     addUser,
     getUser,
     delUser,
-    updateUser
+    updateUser,
+    getAllUsers
 }
