@@ -2,10 +2,6 @@ const User = require('../models/userModel.js');
 const bcrypt = require('bcryptjs')
 const emailValidator = require('email-validator')
 
-const home = (req, res) => {
-    res.send('Hello World!')
-}
-
 const addUser = async (req, res) => {
     
     try{
@@ -120,6 +116,26 @@ const getUser = async (req, res) => {
     }
 }
 
+const userDetails = async (req, res) => {
+    try{
+        const userId = req.user.id
+        const user = await User.findById({_id:userId})
+        res.status(200).json({
+            success: true,
+            data:{
+                name: user.name,
+                username: user.username,
+                email: user.email
+            }
+        })
+    }catch(error){
+        res.status(400).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
 const delUser = async (req, res) => {
     const userId = req.user.id 
 
@@ -140,6 +156,7 @@ const delUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     const userId = req.user.id
+    console.log(userId);
     const {name, username, email, password} = req.body
     try{
         const updatedUser = await User.findByIdAndUpdate(userId, req.body, {new: true, runValidators: true})
@@ -171,10 +188,10 @@ const getAllUsers = async (req, res) => {
 }
 
 module.exports = {
-    home,
     addUser,
     getUser,
     delUser,
     updateUser,
-    getAllUsers
+    getAllUsers,
+    userDetails
 }
