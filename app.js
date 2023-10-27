@@ -4,6 +4,7 @@ const dbConnection = require('./config/dbConnection.js')
 const router = require('./routes/userRoutes.js')
 const cookieParser = require('cookie-parser')
 
+
 const app = express()
 dbConnection()
 app.use(cookieParser())
