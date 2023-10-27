@@ -49,6 +49,9 @@ const addUser = async (req, res) => {
             password: hashedPass
         })
 
+        if(user){
+            console.log('User created');
+        }
         res.status(201).json({
             success: true,
             user
@@ -63,23 +66,21 @@ const addUser = async (req, res) => {
 }
 
 const getUser = async (req, res) => {
-    const {email, username, password} = req.body;
-    let user = null
+    const {email, password} = req.body;
+    console.log(req.body);
 
     try {
+
         // If any field is missing
-        if((!username && !email) || !password){
+        if(!email || !password){
             throw new Error('Please fill all the fields')
         }
 
-        if(!username && email){
-            // If user exists with this email
-            user = await User.findOne({email}).select('+password') || null
-        }else if(!email && username){
-            user = await User.findOne({username}).select('+password') || null
-        }else{
-            throw new Error('Please enter either username or email')
-        }
+       
+        let user = await User.findOne({email}).select('+password') || null
+
+        // verify user
+        let verifiedPass = await bcrypt.compare(password, user.password) || false
 
         // If user does not exist
         if(user===null){
@@ -87,7 +88,7 @@ const getUser = async (req, res) => {
         }
 
         // If password is wrong
-        if( !bcrypt.compare(password, user.password)){
+        if( !verifiedPass){
             throw new Error('Wrong password')
         }
 
@@ -103,12 +104,16 @@ const getUser = async (req, res) => {
 
         res.cookie('token', token, cookieOptions)
 
+        // if (user !== null){
+        //     console.log('User logged in');
+        // }
         res.status(200).json({
             success: true,
             user
         })
         
     } catch (err) {
+        console.log(err.message);
         res.status(400).json({
             success: false,
             message: err.message
