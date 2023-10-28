@@ -78,7 +78,7 @@ const getUser = async (req, res) => {
 
        
         let user = await User.findOne({email}).select('+password') || null
-
+        console.log(user);
         // verify user
         let verifiedPass = await bcrypt.compare(password, user.password) || false
 
@@ -194,11 +194,58 @@ const getAllUsers = async (req, res) => {
     }
 }
 
+const logOut = async (req, res) => {
+    try {
+
+        console.log(req.cookies.token);
+
+        const cookieOptions = {
+            expires: new Date(), 
+            httpOnly: true
+        }
+
+        res.cookie("token", null, cookieOptions)
+        
+        res.status(200).json({
+            success: true, 
+            message: "User logged out successfully !"
+        })
+        
+    } catch (error) {
+        res.status(400).json({
+            success: false,
+            message: error.message
+        })
+    }
+}
+
+// exports.signOut = (req, res) =>{
+//     try {
+
+//       const cookieOption = {
+//         expires: new Date(),
+//         httpOnly: true
+//       }
+//       res.cookie("token", null, cookieOption)
+//       res.status(200).json({
+//         success: true,
+//         message: "User Logged Out Successfully"
+//       })
+
+//     } catch (error) {
+//       res.status(400).json({
+//         success: false,
+//         message: error.message
+//       })
+//     }
+// }
+
 module.exports = {
     addUser,
     getUser,
     delUser,
     updateUser,
     getAllUsers,
-    userDetails
+    userDetails,
+    logOut
 }
