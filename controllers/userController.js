@@ -164,7 +164,7 @@ const delUser = async (req, res) => {
 const updateUser = async (req, res) => {
     const userId = req.user.id
     console.log(userId);
-    const {name, username, email, password} = req.body
+    const {name, password} = req.body
     try{
         const updatedUser = await User.findByIdAndUpdate(userId, req.body, {new: true, runValidators: true})
         res.status(200).json({
