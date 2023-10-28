@@ -104,9 +104,9 @@ const getUser = async (req, res) => {
 
         res.cookie('token', token, cookieOptions)
 
-        // if (user !== null){
-        //     console.log('User logged in');
-        // }
+        if (user !== null){
+            console.log('User logged in');
+        }
         res.status(200).json({
             success: true,
             user
@@ -124,6 +124,7 @@ const getUser = async (req, res) => {
 const userDetails = async (req, res) => {
     try{
         const userId = req.user.id
+        console.log(userId);
         const user = await User.findById({_id:userId})
         res.status(200).json({
             success: true,
@@ -134,6 +135,7 @@ const userDetails = async (req, res) => {
             }
         })
     }catch(error){
+        console.log(error.message);
         res.status(400).json({
             success: false,
             message: error.message
