@@ -164,7 +164,8 @@ const delUser = async (req, res) => {
 const updateUser = async (req, res) => {
     const userId = req.user.id
     console.log(userId);
-    const {name, password} = req.body
+    const {name,  email, username} = req.body
+    console.log(req.body);
     try{
         const updatedUser = await User.findByIdAndUpdate(userId, req.body, {new: true, runValidators: true})
         res.status(200).json({
@@ -218,27 +219,6 @@ const logOut = async (req, res) => {
         })
     }
 }
-
-// exports.signOut = (req, res) =>{
-//     try {
-
-//       const cookieOption = {
-//         expires: new Date(),
-//         httpOnly: true
-//       }
-//       res.cookie("token", null, cookieOption)
-//       res.status(200).json({
-//         success: true,
-//         message: "User Logged Out Successfully"
-//       })
-
-//     } catch (error) {
-//       res.status(400).json({
-//         success: false,
-//         message: error.message
-//       })
-//     }
-// }
 
 module.exports = {
     addUser,
