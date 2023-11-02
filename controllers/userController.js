@@ -42,7 +42,7 @@ const addUser = async (req, res) => {
         const hashedPass = await bcrypt.hash(password, 8);
 
         // If everything is fine
-        const user = await User.create({
+        const user = new User({
             name,
             username,
             email,
@@ -50,8 +50,9 @@ const addUser = async (req, res) => {
         })
 
         if(user){
-            console.log('User created');
+            user.save()
         }
+
         res.status(201).json({
             success: true,
             user
