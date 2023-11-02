@@ -38,7 +38,7 @@ const addUser = async (req, res) => {
             throw new Error('User already exists with this username')
         }
 
-        // // Hashing the password
+        // Hashing the password
         // const hashedPass = await bcrypt.hash(password, 8);
 
         // If everything is fine
@@ -46,7 +46,7 @@ const addUser = async (req, res) => {
             name,
             username,
             email,
-            password
+            password: hashedPass
         })
 
         if(user){
@@ -80,11 +80,9 @@ const getUser = async (req, res) => {
         console.log(email);
 
         let user = await User.findOne({email}).select('+password') || null
-        console.log(user);
 
-        console.log(user.password);
         // verify user
-        let verifiedPass = await bcrypt.compare(password, user.password)
+        let verifiedPass = await bcrypt.compare(password, user.password) || false
         console.log(verifiedPass);
 
         // If user does not exist

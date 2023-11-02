@@ -3,8 +3,6 @@ const JWT = require('jsonwebtoken')
 const authToken = (req, res, next) => {
     // verify token
     const token = req.cookies.token || null
-    console.log("Token is ::" ,token);
-
     try{
         if(!token){
             throw new Error('Please login to continue')
