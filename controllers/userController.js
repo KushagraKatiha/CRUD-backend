@@ -38,15 +38,15 @@ const addUser = async (req, res) => {
             throw new Error('User already exists with this username')
         }
 
-        // Hashing the password
-        const hashedPass = await bcrypt.hash(password, 8);
+        // // Hashing the password
+        // const hashedPass = await bcrypt.hash(password, 8);
 
         // If everything is fine
         const user = new User({
             name,
             username,
             email,
-            password: hashedPass
+            password
         })
 
         if(user){
@@ -77,11 +77,15 @@ const getUser = async (req, res) => {
             throw new Error('Please fill all the fields')
         }
 
-       
+        console.log(email);
+
         let user = await User.findOne({email}).select('+password') || null
         console.log(user);
+
+        console.log(user.password);
         // verify user
-        let verifiedPass = await bcrypt.compare(password, user.password) || false
+        let verifiedPass = await bcrypt.compare(password, user.password)
+        console.log(verifiedPass);
 
         // If user does not exist
         if(user===null){
@@ -125,7 +129,6 @@ const getUser = async (req, res) => {
 const userDetails = async (req, res) => {
     try{
         const userId = req.user.id
-        console.log(userId);
         const user = await User.findById({_id:userId})
         res.status(200).json({
             success: true,
@@ -164,9 +167,7 @@ const delUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
     const userId = req.user.id
-    console.log(userId);
     const {name,  email, username} = req.body
-    console.log(req.body);
     try{
         const updatedUser = await User.findByIdAndUpdate(userId, req.body, {new: true, runValidators: true})
         res.status(200).json({
